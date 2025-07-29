@@ -170,7 +170,8 @@ InitialSetup() {
 
     # get SWINT MAC address automatically
     SWMAC=`ifconfig $SWINT | grep -i ether | awk '{ print $2 }'`
-
+    # Block traffic originating from the bridge (for now)
+    $CMD_EBTABLES -t nat -A POSTROUTING -s $SWMAC -o $SWINT -j DROP
     if [ "$OPTION_AUTONOMOUS" -eq 0 ]; then
         echo
         echo -e "$SUCC [ + ] Ground work done.$TXTRST"
@@ -266,8 +267,9 @@ ConnectionSetup() {
     if [ "$OPTION_CONNECTION_SETUP_ONLY" -eq 1 ]; then
         SWMAC=`ifconfig $SWINT | grep -i ether | awk '{ print $2 }'`
     fi
-    $CMD_EBTABLES -t nat -A POSTROUTING -s $SWMAC -o $SWINT -j snat --to-src $COMPMAC
-    $CMD_EBTABLES -t nat -A POSTROUTING -s $SWMAC -o $BRINT -j snat --to-src $COMPMAC
+    # TODO check if this works: this should put the rules before our block rule, therefore natted traffic goes through but any traffic that does not match the NAT rule, gets blocked
+    $CMD_EBTABLES -t nat -I POSTROUTING -s $SWMAC -o $SWINT -j snat --to-src $COMPMAC
+    $CMD_EBTABLES -t nat -I POSTROUTING -s $SWMAC -o $BRINT -j snat --to-src $COMPMAC
 
     ## Create default routes so we can route traffic - all traffic goes to the bridge gateway and this traffic gets Layer 2 sent to GWMAC
     arp -s -i $BRINT $BRGW $GWMAC
