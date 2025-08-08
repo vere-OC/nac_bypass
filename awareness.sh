@@ -14,6 +14,7 @@ STATE_COUNTER=0
 THRESHOLD_UP=3
 THRESHOLD_DOWN=5
 TIMER="5s"
+url="<TODO Replace with project specific>"
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
@@ -74,11 +75,16 @@ do
         if [ "$STATE_COUNTER" -eq "$THRESHOLD_UP" ] && [ "$NETWORK_STATE_INTERFACE" -eq 1 ]; then
             echo "[!!] Set new config"
             bash "${SCRIPT_DIR}/nac_bypass_setup.sh" -a -c
+            curl -X POST -H "Content-Type:applciation/json" -d '{"text":"Connection Up, client was connected and you should be able to access the network now"}' $url
+
  
         elif [ "$STATE_COUNTER" -eq "$THRESHOLD_DOWN" ] && [ "$NETWORK_STATE_INTERFACE" -eq 0 ]; then
             echo "[!!] Reset config"
             bash "${SCRIPT_DIR}/nac_bypass_setup.sh" -a -r
             bash "${SCRIPT_DIR}/nac_bypass_setup.sh" -a -i
+
+            curl -X POST -H "Content-Type:applciation/json" -d '{"text":"Connection Down, client was disconnected, going back to pure bridge mode"}' $url
+                                                                                                     
         fi
 
         echo "[*] Waiting"
