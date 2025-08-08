@@ -233,8 +233,8 @@ ConnectionSetup() {
 
     ## PCAP and look for SYN packets coming from the victim PC to get the source IP, source mac, and gateway MAC
     # TODO: Replace this with tcp SYN OR (udp && not broadcast? need to tell whos source and whos dest)
-    # TODO: Replace with actually pulling from the source interface?
-    tcpdump -i $COMPINT -s0 -w $TEMP_FILE -c1 'tcp[13] & 2 != 0'
+    # NOTE: This will stop working when we make the interface interchangeable -> find a better way then
+    tcpdump -Q in -i $COMPINT -s0 -w $TEMP_FILE -c1 'tcp[13] & 2 != 0'
 
     COMPMAC=`tcpdump -r $TEMP_FILE -nne -c 1 tcp | awk '{print $2","$4$10}' | cut -f 1-4 -d.| awk -F ',' '{print $1}'`
     if [ -z "$GWMAC" ]; then
