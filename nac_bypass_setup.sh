@@ -148,6 +148,9 @@ InitialSetup() {
     fi
 
     systemctl stop NetworkManager.service
+    # Troubleshoot connection issues
+    mbimcli -d /dev/cdc-wdm0 --device-open-proxy --connect="apn='gprs.swisscom.ch'" --no-close
+    dhclient wwan0
     cp /etc/sysctl.conf /etc/sysctl.conf.bak
     echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.conf
     sysctl -p
